@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class CustomRoomPlayer : NetworkRoomPlayer
 {
+    [SyncVar]
+    public int selectedCharacterIndex = 0; // 0 = Dog, 1 = Cat
+
     // This runs when the Client starts for this specific player object
     public override void OnStartClient()
     {
@@ -11,20 +14,29 @@ public class CustomRoomPlayer : NetworkRoomPlayer
         Debug.Log($"Player joined lobby. Index: {index}");
     }
 
-    // Optional: Use this to update UI text to show if player is ready
-    public void Update()
-    {
-        // For debugging purposes in the console
-        if (Input.GetKeyDown(KeyCode.R) && isLocalPlayer)
-        {
-            ToggleReady();
-        }
-    }
+    // Update method removed to prevent legacy Input System crash
 
     public void ToggleReady()
     {
         // This is a built-in Mirror function that syncs state
         CmdChangeReadyState(!readyToBegin);
+    }
+
+    [Command]
+    public void CmdSelectCharacter(int characterIndex)
+    {
+        if (readyToBegin) return; // Prevent changing character after locking in
+        selectedCharacterIndex = characterIndex;
+    }
+
+    public void SwitchCharacter()
+    {
+        if (isLocalPlayer)
+        {
+            // Toggle between 0 (Dog) and 1 (Cat)
+            int nextIndex = (selectedCharacterIndex + 1) % 2;
+            CmdSelectCharacter(nextIndex);
+        }
     }
 
     // This is called by Mirror when the ready state changes

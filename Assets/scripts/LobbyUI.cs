@@ -1,6 +1,6 @@
 using Mirror;
 using UnityEngine;
-using TMPro; // We use TextMeshPro for modern UI
+using TMPro;
 
 public class LobbyUI : MonoBehaviour
 {
@@ -10,7 +10,7 @@ public class LobbyUI : MonoBehaviour
 
     void Update()
     {
-        // 1. Reset texts to default 'Waiting' state in case a player hasn't joined
+        // 1. Reset texts to default 'Waiting' state
         if (player1Text != null) 
         {
             player1Text.text = "Player 1: Waiting for connection...";
@@ -29,7 +29,6 @@ public class LobbyUI : MonoBehaviour
         // 3. Update the UI based on their status
         foreach (var player in players)
         {
-            // Player index 0 is Host (Player 1), index 1 is Client (Player 2)
             TMP_Text targetText = (player.index == 0) ? player1Text : player2Text;
             
             if (targetText != null)
@@ -37,13 +36,15 @@ public class LobbyUI : MonoBehaviour
                 // Set the base color: Player 1 is Blue, Player 2 is Red
                 targetText.color = (player.index == 0) ? Color.blue : Color.red;
 
+                string characterName = player.selectedCharacterIndex == 0 ? "DOG" : "CAT";
+
                 if (player.readyToBegin)
                 {
-                    targetText.text = $"Player {player.index + 1}: READY!";
+                    targetText.text = $"Player {player.index + 1}: [{characterName}] READY!";
                 }
                 else
                 {
-                    targetText.text = $"Player {player.index + 1}: Not Ready";
+                    targetText.text = $"Player {player.index + 1}: [{characterName}] Not Ready";
                 }
             }
         }
@@ -51,14 +52,24 @@ public class LobbyUI : MonoBehaviour
 
     public void ToggleReady()
     {
-        // Find the local player object in the lobby
         if (NetworkClient.localPlayer != null)
         {
             var roomPlayer = NetworkClient.localPlayer.GetComponent<CustomRoomPlayer>();
             if (roomPlayer != null)
             {
-                // Toggles the ready state
-                roomPlayer.CmdChangeReadyState(!roomPlayer.readyToBegin);
+                roomPlayer.ToggleReady();
+            }
+        }
+    }
+
+    public void SwitchCharacter()
+    {
+        if (NetworkClient.localPlayer != null)
+        {
+            var roomPlayer = NetworkClient.localPlayer.GetComponent<CustomRoomPlayer>();
+            if (roomPlayer != null)
+            {
+                roomPlayer.SwitchCharacter();
             }
         }
     }
